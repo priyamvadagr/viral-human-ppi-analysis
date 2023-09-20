@@ -1,3 +1,4 @@
+#annotating sasa file with interface, surface or not-surface, high or low grantham, and high or low doolittle
 library(tidyverse)
 library(stringr)
 library(data.table)
@@ -28,6 +29,12 @@ colnames(aa_code) <- c('AMINO_ACID', 'AA_RESIDUE_3_CODE', 'AA_CODE')
 #convert amino acid names to three letter codes 
 aa_max_asa <- left_join(aa_max_asa, aa_code, by = 'AMINO_ACID')
 aa_max_asa <- aa_max_asa[, c('AA_RESIDUE_3_CODE', 'AA_CODE', 'MAX_ASA')]
+#doolittle_scale
+doolittle_scale <- read.table('/ix/djishnu/Priyamvada/viral-human-ppi/doolittle_analysis/doolittle_scale.txt', header = T)
+doolittle_scale <- doolittle_scale[, c("AA_CODE", "DOOLITTLE_CATEGORY")]
+#grantham_score
+grantham_scale <- read.table('/ix/djishnu/Priyamvada/viral-human-ppi/grantham_analysis/grantham_scale.txt', header = T)
+grantham_scale <- grantham_scale[, c("AA_CODE", "GRANTHAM_CATEGORY")]
 #using threshold of 30% to define accessible residues 
 for (file in 1:length(all_sasa_files$file_names)) {
   sasa_file <- fread(paste0(in_dir, '/', all_sasa_files$file_names[file]))
@@ -38,6 +45,8 @@ for (file in 1:length(all_sasa_files$file_names)) {
                                                                   DELTA_SASA < 1 ~ 'NI'))
   sasa_file <- sasa_file %>% mutate('SURFACE_ANNOT' = case_when(REL_ASA >= 0.3 ~ 'S',
                                                                 REL_ASA < 0.3 ~ 'NS'))
+  sasa_file <- left_join(sasa_file, grantham_scale, by = 'AA_CODE')
+  sasa_file <- left_join(sasa_file, doolittle_scale, by = 'AA_CODE')
   write.table(sasa_file, file = paste0(out_dir, '/', all_sasa_files$New_PPI[file]), 
               col.names = T, row.names = F, quote = F, sep = '\t')
 }

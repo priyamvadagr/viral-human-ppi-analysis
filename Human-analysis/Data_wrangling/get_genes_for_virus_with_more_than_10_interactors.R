@@ -4,7 +4,7 @@
 #######################################################################################################
 library(tidyverse)
 library(data.table)
-prediction_file <- fread('/ix/djishnu/Priyamvada/viral-human-ppi/data_from_Le/v2h_binary_list_20230908_human_viral_gene_names.txt')
+prediction_file <- fread('/ix/djishnu/Priyamvada/viral-human-ppi/data_from_Le/v2h_binary_list_high_confidence_interactions.txt') #only running with high_confidenc interactions
 #subset to genes and virus taxon 
 genes_interface <- prediction_file[, c("Human_gene_name", "Viral_taxonomy_id")]
 genes_interface <- genes_interface %>% group_by(Viral_taxonomy_id) %>% unique()
@@ -20,5 +20,6 @@ genes_interface_list <- split(genes_interface, f = genes_interface$Viral_taxonom
 for (virus in 1:length(virus_to_keep)) {
   df = genes_interface_list[[virus_to_keep[virus]]]
   #file_name = str_replace_all(virus_to_keep[virus], '/', '_._')
-  write.table(df, file = paste0("/ix/djishnu/Priyamvada/viral-human-ppi/taxa_based_analysis/Genes_for_virus", '/', virus_to_keep[virus], ".txt"), sep = '\t', col.names = F, row.names = F, quote = F)
+  write.table(df, file = paste0("/ix/djishnu/Priyamvada/viral-human-ppi/taxa_based_analysis/High_confidence_interactions_only/Genes_for_virus", '/', virus_to_keep[virus], ".txt"),
+              sep = '\t', col.names = F, row.names = F, quote = F)
 }
